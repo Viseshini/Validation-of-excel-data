@@ -1,0 +1,115 @@
+Function Button1_Click()
+    ' Enter the last column number in the worksheet
+    Const LastColumn As Integer = 2
+    LastRow = Cells(Rows.Count, 1).End(xlUp).row
+    Dim thisColumn As Byte, thisRow As Byte
+    thisColumn = 1
+    ' thisRow = 1 is for the legend and thisRow = 2 is for the headers
+    For thisRow = 3 To LastRow
+        If IsEmpty(Cells(thisRow, thisColumn)) = True Then
+            Cells(thisRow, thisColumn).Interior.ColorIndex = 3 'Fill Red
+        Else
+            Call checkPhoneNumber(thisRow, thisColumn)
+        End If
+    Next thisRow
+    
+    thisColumn = 2
+    ' thisRow = 1 is for the legend and thisRow = 2 is for the headers
+    For thisRow = 3 To LastRow
+        If IsEmpty(Cells(thisRow, thisColumn)) = True Then
+            Cells(thisRow, thisColumn).Interior.ColorIndex = 3 'Fill Red
+        Else
+            Call checkString(thisRow, thisColumn)
+        End If
+    Next thisRow
+    
+    thisColumn = 3
+    ' thisRow = 1 is for the legend and thisRow = 2 is for the headers
+    For thisRow = 3 To LastRow
+        If IsEmpty(Cells(thisRow, thisColumn)) = True Then
+            Cells(thisRow, thisColumn).Interior.ColorIndex = 3 'Fill Red
+        Else
+            Call checkDate(thisRow, thisColumn)
+        End If
+    Next thisRow
+    
+    thisColumn = 4
+    ' thisRow = 1 is for the legend and thisRow = 2 is for the headers
+    For thisRow = 3 To LastRow
+        If IsEmpty(Cells(thisRow, thisColumn)) = True Then
+            Cells(thisRow, thisColumn).Interior.ColorIndex = 3 'Fill Red
+        Else
+            Call checkCurrency(thisRow, thisColumn)
+        End If
+    Next thisRow
+    
+End Function
+' Is true for 1.1 and 1 or any numeric type
+Sub checkNumber(row As Byte, col As Byte)
+    If IsNumeric(Cells(row, col)) = False Then
+        Cells(row, col).Interior.ColorIndex = 6 'Fill Yellow
+    Else
+        Cells(row, col).Interior.ColorIndex = 0 'Remove Colour
+    End If
+End Sub
+' Is true for letters and spaces
+Sub checkString(row As Byte, col As Byte)
+    If Application.IsText(Cells(row, col)) = False Then
+        Cells(row, col).Interior.ColorIndex = 6 'Fill Yellow
+    Else
+        Cells(row, col).Interior.ColorIndex = 0 'Remove Colour
+    End If
+End Sub
+' Is true for 01/01/2017 0/0/2017 0/0/17 0/jan/17 0-jan-17 0-Jan-17
+Sub checkDate(row As Byte, col As Byte)
+    ' ^..$ matches the entire string
+    Dim strPattern As String: strPattern = "^[0-9]{1,2}(?:/|-)(?:[0-9]{1,2}|[a-zA-Z]{3})(?:/|-)(?:[0-9]{4}|[0-9]{2})$"
+    Dim regEx As New RegExp
+    With regEx
+        .Global = True
+        .MultiLine = True
+        .IgnoreCase = False
+        .Pattern = strPattern
+    End With
+
+    If regEx.Test(Cells(row, col)) = False Then
+        Cells(row, col).Interior.ColorIndex = 6 'Fill Yellow
+    Else
+        Cells(row, col).Interior.ColorIndex = 0 'Remove Colour
+    End If
+End Sub
+' Is true for +(00) 999, (00) 999,  +91 99496-35552,(00)+12234
+Sub checkPhoneNumber(row As Byte, col As Byte)
+    ' ^..$ matches the entire string
+    Dim strPattern As String: strPattern = "^[0-9\(\)\+\-]+$"
+    Dim regEx As New RegExp
+    With regEx
+        .Global = True
+        .MultiLine = True
+        .IgnoreCase = False
+        .Pattern = strPattern
+    End With
+
+    If regEx.Test(Cells(row, col)) = False Then
+        Cells(row, col).Interior.ColorIndex = 6 'Fill Yellow
+    Else
+        Cells(row, col).Interior.ColorIndex = 0 'Remove Colour
+    End If
+End Sub
+' $1, $1., $2.343
+Sub checkCurrency(row As Byte, col As Byte)
+    Dim strPattern As String: strPattern = "^\$[0-9]+\.?[0-9]*$"
+    Dim regEx As New RegExp
+    With regEx
+        .Global = True
+        .MultiLine = True
+        .IgnoreCase = False
+        .Pattern = strPattern
+    End With
+    'Fetch the cell's Text including the formatting, Trim trailing spaces for matching
+    If regEx.Test(Trim(Cells(row, col).Text)) = False Then
+        Cells(row, col).Interior.ColorIndex = 6 'Fill Yellow
+    Else
+        Cells(row, col).Interior.ColorIndex = 0 'Remove Colour
+    End If
+End Sub
